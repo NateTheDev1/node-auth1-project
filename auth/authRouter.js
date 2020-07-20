@@ -15,6 +15,20 @@ router.post("/register", validateBody, (req, res) => {
     });
 });
 
+router.post("/login", validateBody, (req, res) => {
+  db.findUser(req.username)
+    .then((user) => {
+      if (user && bcrypt.compareSync(req.password, user.password)) {
+        res.status(200).json({ message: "You have been logged in." });
+      } else {
+        res.status(401).json({ error: "Invalid Credentials" });
+      }
+    })
+    .catch((err) => {
+      handleError(err, res);
+    });
+});
+
 function validateBody(req, res, next) {
   if (req.body.username === undefined || req.body.password === undefined) {
     handleError("ERROR", res, "Required: Username And Password");

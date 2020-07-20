@@ -4,4 +4,12 @@ function find() {
   return db.select("id", "username").from("users");
 }
 
-module.exports = { find };
+function findBy(query) {
+  return db("users").where({ query }).first();
+}
+
+function create(user) {
+  return db("users").insert(user);
+}
+
+module.exports = { find, create };

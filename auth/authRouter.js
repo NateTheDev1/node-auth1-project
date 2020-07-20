@@ -19,7 +19,12 @@ router.post("/login", validateBody, (req, res) => {
   db.findUser(req.username)
     .then((user) => {
       if (user && bcrypt.compareSync(req.password, user.password)) {
-        res.status(200).json({ message: "You have been logged in." });
+        req.session.loggedIn = true;
+        req.session.username = user.username;
+        req.session.uid = user.id;
+        res
+          .status(200)
+          .json({ message: "You have been logged in.", session: req.session });
       } else {
         res.status(401).json({ error: "Invalid Credentials" });
       }
@@ -27,6 +32,20 @@ router.post("/login", validateBody, (req, res) => {
     .catch((err) => {
       handleError(err, res);
     });
+});
+
+router.get("/logout", (req, res) => {
+  if (req.session) {
+    req.session.destroy((err) => {
+      if (err) {
+        handleError(err, res, "COULD NOT LOGOUT USER");
+      } else {
+        res.status(204).end();
+      }
+    });
+  } else {
+    res.status(200).json({ message: "Already Logged Out" });
+  }
 });
 
 function validateBody(req, res, next) {

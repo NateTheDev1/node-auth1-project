@@ -5,6 +5,7 @@ const db = require("../auth/user-model");
 const session = require("express-session");
 const KnexSessionStore = require("connect-session-knex")(session);
 const server = express();
+const verifyCookie = require("../auth/authorizeSession");
 
 const dbConnection = require("../data/connection");
 const sessionConfiguration = {
@@ -39,7 +40,7 @@ server.get("/api", (req, res) => {
   res.status(200).json({ api: "Up and Running Great!" });
 });
 
-server.get("/api/users", async (req, res) => {
+server.get("/api/users", verifyCookie, async (req, res) => {
   const users = await db.find();
   if (!users) {
     handleError("USERS NOT FOUND", res);
@@ -48,7 +49,7 @@ server.get("/api/users", async (req, res) => {
   res.status(200).json({ data: users });
 });
 
-server.get("/api/users/:id", (req, res) => {
+server.get("/api/users/:id", verifyCookie, (req, res) => {
   db.findBy(req.params.id)
     .then((user) => {
       res.status(200).json({ data: user });
